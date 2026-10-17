@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 const TABS = [
   ["inscriptions", "Inscriptions"],
   ["competition", "Compétition"],
+  ["salle", "Salle"],
   ["tableaux", "Tableaux"],
   ["reglages", "Réglages"],
 ] as const;

@@ -437,7 +437,7 @@ export function reopenMatch(matchId: number) {
       if (ev.status === "termine") db.prepare("UPDATE events SET status = 'tableau' WHERE id = ?").run(ev.id);
       db.prepare("UPDATE tournaments SET status = 'en_cours' WHERE id = ? AND status = 'termine'").run(ev.tournament_id);
     }
-    db.prepare("UPDATE matches SET winner = NULL, outcome = NULL, sets = '[]', status = 'pret', finished_at = NULL WHERE id = ?").run(m.id);
+    db.prepare("UPDATE matches SET winner = NULL, outcome = NULL, sets = '[]', status = 'pret', finished_at = NULL, court_no = NULL, called_at = NULL, started_at = NULL WHERE id = ?").run(m.id);
   })();
 }
 
@@ -462,3 +462,92 @@ export function eventView(ev: TEvent) {
   return { entries, matches, groups, rounds, podium, played, total };
 }
 export type EventView = ReturnType<typeof eventView>;
+
+// ---------------------------------------------------------------------------
+// Appel des matchs sur les tables / terrains
+// ---------------------------------------------------------------------------
+
+/** Minutes de repos accordées à un joueur qui sort de table avant de le rappeler. */
+export const REST_MINUTES = 3;
+
+function playersOf(entryIds: (number | null)[]) {
+  const ids = entryIds.filter((x): x is number => x != null);
+  if (!ids.length) return [];
+  const rows = db.prepare(`SELECT player_id, partner_id FROM entries WHERE id IN (${ids.map(() => "?").join(",")})`).all(...ids) as { player_id: number; partner_id: number | null }[];
+  return rows.flatMap((r) => [r.player_id, r.partner_id]).filter((x): x is number => x != null);
+}
+
+/** Joueurs actuellement appelés ou en train de jouer (un joueur ne peut pas être sur deux tables). */
+export function busyPlayers(tournamentId: number) {
+  return new Set(tournamentMatches(tournamentId, "m.status IN ('appele','en_cours')").flatMap((m) => playersOf([m.entry_a, m.entry_b])));
+}
+
+export function freeCourts(tournamentId: number) {
+  const t = getTournament(tournamentId)!;
+  const used = new Set(tournamentMatches(tournamentId, "m.status IN ('appele','en_cours') AND m.court_no IS NOT NULL").map((m) => m.court_no));
+  return Array.from({ length: t.courts_count }, (_, i) => i + 1).filter((n) => !used.has(n));
+}
+
+export type QueueItem = { m: Match; blocked: boolean; resting: boolean };
+
+/**
+ * File d'attente : matchs prêts, du plus ancien au plus récent.
+ * Un match dont un joueur est déjà sur une table est bloqué ; un joueur qui vient de jouer passe après les autres.
+ */
+export function queue(tournamentId: number): QueueItem[] {
+  const busy = busyPlayers(tournamentId);
+  const order = new Map((db.prepare("SELECT id, position FROM events WHERE tournament_id = ?").all(tournamentId) as { id: number; position: number }[]).map((e) => [e.id, e.position]));
+  const lastPlayed = new Map<number, number>();
+  for (const m of tournamentMatches(tournamentId, "m.status = 'termine' AND m.outcome = 'normal'"))
+    for (const p of playersOf([m.entry_a, m.entry_b])) lastPlayed.set(p, Math.max(lastPlayed.get(p) ?? 0, Date.parse(m.finished_at!)));
+  const restLimit = Date.now() - REST_MINUTES * 60_000;
+  return tournamentMatches(tournamentId, "m.status = 'pret'")
+    .sort((a, b) =>
+      (a.ready_at ?? "").localeCompare(b.ready_at ?? "") ||
+      (b.round ?? 0) - (a.round ?? 0) ||
+      (order.get(a.event_id)! - order.get(b.event_id)!) ||
+      (a.group_no ?? 0) - (b.group_no ?? 0) || a.slot - b.slot || a.id - b.id)
+    .map((m) => {
+      const ps = playersOf([m.entry_a, m.entry_b]);
+      return { m, blocked: ps.some((p) => busy.has(p)), resting: ps.some((p) => (lastPlayed.get(p) ?? 0) > restLimit) };
+    })
+    .sort((x, y) => Number(x.blocked) - Number(y.blocked) || Number(x.resting) - Number(y.resting));
+}
+
+export function callMatch(matchId: number, court: number) {
+  const m = getMatch(matchId);
+  if (!m || m.status !== "pret") throw new Error("Ce match n'est pas prêt à être appelé");
+  const ev = getEvent(m.event_id)!;
+  if (!freeCourts(ev.tournament_id).includes(court)) throw new Error("Cette table est déjà occupée");
+  const busy = busyPlayers(ev.tournament_id);
+  if (playersOf([m.entry_a, m.entry_b]).some((p) => busy.has(p))) throw new Error("Un des joueurs est déjà sur une autre table");
+  db.prepare("UPDATE matches SET status = 'appele', court_no = ?, called_at = ? WHERE id = ?").run(court, now(), matchId);
+}
+
+/** Remplit toutes les tables libres avec les prochains matchs jouables. Renvoie le nombre de matchs appelés. */
+export function autoCall(tournamentId: number) {
+  let called = 0;
+  db.transaction(() => {
+    const courts = freeCourts(tournamentId);
+    const busy = busyPlayers(tournamentId);
+    for (const { m } of queue(tournamentId)) {
+      if (!courts.length) break;
+      const ps = playersOf([m.entry_a, m.entry_b]);
+      if (ps.some((p) => busy.has(p))) continue;
+      db.prepare("UPDATE matches SET status = 'appele', court_no = ?, called_at = ? WHERE id = ?").run(courts.shift()!, now(), m.id);
+      ps.forEach((p) => busy.add(p));
+      called++;
+    }
+  })();
+  return called;
+}
+
+/** Le match appelé commence (les joueurs sont à la table). */
+export function startMatch(matchId: number) {
+  db.prepare("UPDATE matches SET status = 'en_cours', started_at = ? WHERE id = ? AND status = 'appele'").run(now(), matchId);
+}
+
+/** Libère la table : le match retourne dans la file d'attente. */
+export function releaseCourt(matchId: number) {
+  db.prepare("UPDATE matches SET status = 'pret', court_no = NULL, called_at = NULL, started_at = NULL WHERE id = ? AND status IN ('appele','en_cours')").run(matchId);
+}

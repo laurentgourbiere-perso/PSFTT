@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireOrganizer } from "@/lib/auth";
 import { getEvent } from "@/lib/tournament";
-import { drawEvent, swapInGroups, getMatch, parseScore, setsWon, setsToWin, closeMatch, reopenMatch, playedCount } from "@/lib/engine";
+import {
+  drawEvent, swapInGroups, getMatch, parseScore, setsWon, setsToWin, closeMatch, reopenMatch, playedCount,
+  autoCall, callMatch, startMatch, releaseCourt,
+} from "@/lib/engine";
 import type { FormState } from "./actions";
 
 const num = (form: FormData, key = "id") => Number(form.get(key));
@@ -84,4 +87,44 @@ export async function reopenAction(_: FormState, form: FormData): Promise<FormSt
   }
   refresh(getEvent(m.event_id)!.tournament_id);
   return { ok: "Résultat annulé" };
+}
+
+// ---------------------------------------------------------------------------
+// Salle : appel des matchs sur les tables
+// ---------------------------------------------------------------------------
+
+export async function autoCallAction(_: FormState, form: FormData): Promise<FormState> {
+  await requireOrganizer();
+  const n = autoCall(num(form));
+  refresh(num(form));
+  return n ? { ok: `${n} match(s) appelé(s)` } : { error: "Aucun match jouable pour les tables libres" };
+}
+
+export async function callAction(_: FormState, form: FormData): Promise<FormState> {
+  await requireOrganizer();
+  const m = getMatch(num(form));
+  if (!m) return { error: "Match introuvable" };
+  try {
+    callMatch(m.id, num(form, "court"));
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+  refresh(getEvent(m.event_id)!.tournament_id);
+  return { ok: "Match appelé" };
+}
+
+export async function startAction(form: FormData) {
+  await requireOrganizer();
+  const m = getMatch(num(form));
+  if (!m) return;
+  startMatch(m.id);
+  refresh(getEvent(m.event_id)!.tournament_id);
+}
+
+export async function releaseAction(form: FormData) {
+  await requireOrganizer();
+  const m = getMatch(num(form));
+  if (!m) return;
+  releaseCourt(m.id);
+  refresh(getEvent(m.event_id)!.tournament_id);
 }

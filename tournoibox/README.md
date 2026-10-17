@@ -40,13 +40,19 @@ Au premier lancement, TournoiBox demande de choisir le **mot de passe organisate
   - échange manuel de deux joueurs de poule, nouveau tirage ou annulation du tirage tant qu'aucun match n'est joué
   - saisie des scores contrôlée selon le sport (11 points à 2 d'écart au tennis de table, 21 avec plafond à 30 au badminton, 13 à la pétanque, score libre ailleurs), forfaits, correction d'un résultat
   - classements de poule avec départage par confrontations directes, tableau final généré automatiquement (sortants d'une même poule dans des moitiés opposées), podium
+- **Salle** (onglet Salle)
+  - toutes les tables (ou terrains) d'un coup d'œil : libre, appelé, en jeu, avec le temps écoulé
+  - bouton « Remplir les tables libres » : appelle les matchs prêts depuis le plus longtemps, sans jamais mettre un joueur sur deux tables (simples et doubles confondus), en laissant souffler 3 minutes ceux qui sortent de table
+  - appel manuel sur une table choisie, « Commencer », « Libérer » (le match retourne dans la file)
+  - saisie du score directement sur la table : la table se libère et le tableau avance
+  - file d'attente commentée (joueur occupé, vient de jouer) et derniers résultats corrigeables
 - **Écran de la salle** (fenêtre à glisser sur le vidéoprojecteur, plein écran) : places restantes par tableau, mises à jour toutes les 3 secondes
 
 ## Feuille de route
 
 1. ✅ Création du tournoi et inscriptions avec places restantes
 2. ✅ Tirage au sort, poules et tableaux
-3. Appel des matchs sur les tables, saisie des scores
+3. ✅ Appel des matchs sur les tables, saisie des scores
 4. Modes de diffusion qui s'enchaînent selon l'état du tournoi : places restantes, poules qui défilent, tableaux, appels des joueurs, résultats, podiums
 5. Lots, tombola, palmarès
 6. Installateur Windows (double-clic, raccourci sur le bureau, sauvegarde automatique de la base)
