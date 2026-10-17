@@ -74,3 +74,28 @@ CREATE TABLE IF NOT EXISTS entries (
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_entries_event ON entries(event_id, status);
+
+CREATE TABLE IF NOT EXISTS matches (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id     INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  stage        TEXT NOT NULL,                   -- poule | ko
+  group_no     INTEGER,
+  round        INTEGER,                         -- ko : nombre de joueurs du tour (16, 8, 4, 2)
+  slot         INTEGER NOT NULL DEFAULT 0,      -- ordre dans la poule / position dans le tour
+  entry_a      INTEGER REFERENCES entries(id) ON DELETE SET NULL,
+  entry_b      INTEGER REFERENCES entries(id) ON DELETE SET NULL,
+  handicap_a   INTEGER NOT NULL DEFAULT 0,
+  handicap_b   INTEGER NOT NULL DEFAULT 0,
+  sets         TEXT NOT NULL DEFAULT '[]',      -- JSON [[11,7],[9,11]…]
+  winner       INTEGER REFERENCES entries(id) ON DELETE SET NULL,
+  status       TEXT NOT NULL DEFAULT 'attente', -- attente | pret | appele | en_cours | termine
+  outcome      TEXT,                            -- normal | forfait | exempt
+  court_no     INTEGER,
+  next_match   INTEGER REFERENCES matches(id) ON DELETE SET NULL,
+  next_side    TEXT,                            -- a | b
+  ready_at     TEXT,
+  called_at    TEXT,
+  started_at   TEXT,
+  finished_at  TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_matches_event ON matches(event_id, stage);
