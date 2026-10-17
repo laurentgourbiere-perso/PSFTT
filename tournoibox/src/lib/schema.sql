@@ -99,3 +99,19 @@ CREATE TABLE IF NOT EXISTS matches (
   finished_at  TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_matches_event ON matches(event_id, stage);
+
+-- Lots : par tableau et par place (lot sportif), ou tombola (tableau et place vides)
+CREATE TABLE IF NOT EXISTS prizes (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  tournament_id  INTEGER NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
+  event_id       INTEGER REFERENCES events(id) ON DELETE CASCADE,
+  rank           INTEGER,                       -- 1 vainqueur, 2 finaliste, 3 demi-finaliste…
+  label          TEXT NOT NULL,
+  value          REAL,                          -- valeur en €
+  sponsor        TEXT,                          -- offert par
+  winner_entry   INTEGER REFERENCES entries(id) ON DELETE SET NULL,  -- lot sportif
+  winner_player  INTEGER REFERENCES players(id) ON DELETE SET NULL,  -- tombola
+  drawn_at       TEXT,                          -- date du tirage de tombola
+  handed_at      TEXT                           -- lot remis
+);
+CREATE INDEX IF NOT EXISTS idx_prizes_tournament ON prizes(tournament_id);

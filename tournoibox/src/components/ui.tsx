@@ -20,3 +20,11 @@ export function OpenScreenButton({ href, children }: { href: string; children: R
     </button>
   );
 }
+
+export function PrintButton() {
+  return (
+    <button type="button" className="btn btn-ghost print:hidden" onClick={() => window.print()}>
+      Imprimer / PDF
+    </button>
+  );
+}

@@ -51,6 +51,12 @@ Au premier lancement, TournoiBox demande de choisir le **mot de passe organisate
   - en automatique, les matchs appelés restent affichés en bandeau sur toutes les diapositives
   - modes forcés : places restantes, appels, tables, poules, tableaux, résultats, podiums, annonce plein écran
   - annonce qui défile en bas de l'écran (« Remise des prix à 18h »), durée des diapositives réglable
+- **Lots** (onglet Lots)
+  - lots par tableau et par place (valeur, partenaire), en un clic « coupes et médailles » pour tous les tableaux
+  - attribution automatique dès qu'un tableau se termine, refaite si un résultat est corrigé ; suivi des lots remis
+  - tombola : tirage au sort parmi les joueurs présents, un lot par personne, « absent » pour remettre le lot en jeu
+- **Tombola en direct** : chaque tirage passe en priorité sur l'écran de la salle (les noms défilent, ralentissent, puis le gagnant apparaît)
+- **Palmarès** (onglet Palmarès) : podiums, classements, lots et tombola, imprimable ou en PDF
 - **Onglet Écran** : on pilote le vidéoprojecteur depuis le poste organisateur (changement en 3 secondes), avec un aperçu en direct
 
 ## Feuille de route
@@ -59,5 +65,5 @@ Au premier lancement, TournoiBox demande de choisir le **mot de passe organisate
 2. ✅ Tirage au sort, poules et tableaux
 3. ✅ Appel des matchs sur les tables, saisie des scores
 4. ✅ Modes de diffusion qui s'enchaînent selon l'état du tournoi : places restantes, poules qui défilent, tableaux, appels des joueurs, résultats, podiums
-5. Lots, tombola, palmarès
+5. ✅ Lots, tombola, palmarès
 6. Installateur Windows (double-clic, raccourci sur le bureau, sauvegarde automatique de la base)

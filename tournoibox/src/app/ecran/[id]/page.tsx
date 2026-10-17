@@ -8,8 +8,11 @@ import { Logo } from "@/components/Logo";
 import { Clock, FullscreenButton } from "./ScreenTools";
 import { Carousel, type SlideItem } from "./Carousel";
 import {
-  InscriptionsSlide, CallsSlide, CourtsSlide, GroupsSlide, BracketSlide, ResultsSlide, PodiumSlide, MessageSlide, EmptySlide,
+  InscriptionsSlide, CallsSlide, CourtsSlide, GroupsSlide, BracketSlide, ResultsSlide, PodiumSlide, MessageSlide, EmptySlide, RaffleListSlide,
 } from "./slides";
+import { Roulette } from "./Roulette";
+import { db } from "@/lib/db";
+import { getPrizes, recentRaffle } from "@/lib/prizes";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Écran de la salle" };
@@ -57,6 +60,10 @@ export default async function EcranPage({ params, searchParams }: { params: Prom
     resultats: (): SlideItem[] => (results.length ? [{ id: "resultats", node: <ResultsSlide results={results} entries={entries} eventName={eventName} /> }] : []),
     podiums: (): SlideItem[] =>
       views.filter(({ ev, view }) => ev.status === "termine" && view.podium.length).map(({ ev, view }) => ({ id: `podium-${ev.id}`, node: <PodiumSlide ev={ev} podium={view.podium} /> })),
+    tombola: (): SlideItem[] => {
+      const raffle = getPrizes(t.id).filter((p) => p.event_id == null);
+      return raffle.length ? [{ id: "tombola", node: <RaffleListSlide prizes={raffle} /> }] : [];
+    },
     annonce: (): SlideItem[] => (t.screen_message ? [{ id: "annonce", node: <MessageSlide message={t.screen_message} /> }] : []),
   };
 
@@ -64,16 +71,22 @@ export default async function EcranPage({ params, searchParams }: { params: Prom
   if (mode === "auto") {
     // Selon l'avancement : avant le tournoi les places, pendant les appels et l'état des tableaux, à la fin les podiums
     slides = t.status === "termine"
-      ? [...make.podiums(), ...make.tableaux(), ...make.annonce()]
+      ? [...make.podiums(), ...make.tombola(), ...make.tableaux(), ...make.annonce()]
       : [...make.appels(), ...make.inscriptions(), ...make.tables(), ...make.poules(), ...make.tableaux(), ...make.resultats(), ...make.podiums(), ...make.annonce()];
   } else {
     slides = make[mode]();
+  }
+  // Un tirage de tombola vient d'avoir lieu : il passe avant tout le reste, quel que soit le mode
+  const raffle = recentRaffle(t.id);
+  if (raffle) {
+    const names = (db.prepare("SELECT first_name || ' ' || last_name n FROM players WHERE tournament_id = ? AND checked_in = 1 ORDER BY random() LIMIT 60").all(t.id) as { n: string }[]).map((r) => r.n);
+    slides = [{ id: `tirage-${raffle.id}-${raffle.drawn_at}`, node: <Roulette names={names} winner={raffle.raffle_name!} club={raffle.raffle_club} prize={raffle.label} drawnAt={raffle.drawn_at!} /> }];
   }
   if (!slides.length) {
     const why: Record<ScreenMode, string> = {
       auto: "Le tournoi va bientôt commencer", inscriptions: "Les inscriptions sont closes", appels: "Aucun match appelé pour le moment",
       tables: "Aucun match en cours", poules: "Pas de poule en cours", tableaux: "Pas encore de tableau final",
-      resultats: "Pas encore de résultat", podiums: "Les podiums arrivent bientôt", annonce: "Aucune annonce",
+      resultats: "Pas encore de résultat", podiums: "Les podiums arrivent bientôt", tombola: "Pas de tombola", annonce: "Aucune annonce",
     };
     slides = [{ id: "vide", node: <EmptySlide text={why[mode]} /> }];
   }

@@ -61,3 +61,11 @@ body {
 @keyframes progress { from { width: 0; } to { width: 100%; } }
 @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .ticker { animation: ticker 30s linear infinite; }
+
+/* Impression (palmarès) : fond blanc, encre noire */
+@media print {
+  body { background: white; color: black; }
+  .panel { background: white; border-color: #bbb; break-inside: avoid; }
+  .text-muted { color: #555 !important; }
+  .text-lime, .text-brand-2 { color: black !important; }
+}

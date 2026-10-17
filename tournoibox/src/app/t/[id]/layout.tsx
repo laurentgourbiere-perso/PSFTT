@@ -16,7 +16,7 @@ export default async function TournamentLayout({ children, params }: { children:
         <span className="mr-3 truncate font-display text-lg font-bold text-brand-2">{t.name}</span>
         <TabLinks id={t.id} />
       </TopBar>
-      <div className="mx-auto flex max-w-7xl justify-end px-4 pt-4">
+      <div className="mx-auto flex max-w-7xl justify-end px-4 pt-4 print:hidden">
         <OpenScreenButton href={`/ecran/${t.id}`}><Monitor className="h-4 w-4" />Ouvrir l&apos;écran de la salle</OpenScreenButton>
       </div>
       {children}

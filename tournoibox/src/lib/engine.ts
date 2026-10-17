@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { db } from "./db";
 import { getEvent, getTournament, type TEvent } from "./tournament";
 import { sportOf, invalidSet } from "./sports";
+import { awardPrizes, releaseStalePrizes } from "./prizes";
 
 // Moteur de compétition : tirage au sort, poules, tableau final, avancement des matchs.
 
@@ -390,6 +391,7 @@ function finishEvent(ev: TEvent) {
   db.prepare("UPDATE events SET status = 'termine' WHERE id = ?").run(ev.id);
   const left = (db.prepare("SELECT COUNT(*) n FROM events WHERE tournament_id = ? AND status != 'termine'").get(ev.tournament_id) as { n: number }).n;
   if (left === 0) db.prepare("UPDATE tournaments SET status = 'termine' WHERE id = ?").run(ev.tournament_id);
+  awardPrizes(ev.tournament_id);
 }
 
 /** Poules terminées : classements, puis tableau final (ou classement final s'il n'y a qu'une poule). */
@@ -438,6 +440,7 @@ export function reopenMatch(matchId: number) {
       db.prepare("UPDATE tournaments SET status = 'en_cours' WHERE id = ? AND status = 'termine'").run(ev.tournament_id);
     }
     db.prepare("UPDATE matches SET winner = NULL, outcome = NULL, sets = '[]', status = 'pret', finished_at = NULL, court_no = NULL, called_at = NULL, started_at = NULL WHERE id = ?").run(m.id);
+    releaseStalePrizes(ev.id);
   })();
 }
 

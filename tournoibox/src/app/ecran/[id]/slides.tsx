@@ -217,3 +217,19 @@ export function MessageSlide({ message }: { message: string }) {
 export function EmptySlide({ text }: { text: string }) {
   return <div className="flex h-full items-center justify-center text-[2vw] text-muted">{text}</div>;
 }
+
+export function RaffleListSlide({ prizes }: { prizes: { id: number; label: string; sponsor: string | null; raffle_name: string | null }[] }) {
+  return (
+    <div className="flex h-full flex-col">
+      <SlideTitle kicker="Parmi les joueurs présents" title="🎟️ Tombola" />
+      <div className={`grid flex-1 content-center gap-[1vw] ${prizes.length > 6 ? "grid-cols-3" : "grid-cols-2"}`}>
+        {prizes.map((p) => (
+          <div key={p.id} className={`rounded-[0.8vw] border p-[1vw] ${p.raffle_name ? "border-lime/60 bg-lime/10" : "border-line bg-panel/80"}`}>
+            <p className="truncate text-[1.3vw] text-muted">{p.label}{p.sponsor ? ` · ${p.sponsor}` : ""}</p>
+            <p className="truncate font-display text-[2.2vw] font-bold">{p.raffle_name ?? "à tirer…"}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
