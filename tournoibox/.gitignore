@@ -1,0 +1,7 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env*
+# Données du tournoi (base, secret de session) : restent sur le PC de l'organisateur
+data/
