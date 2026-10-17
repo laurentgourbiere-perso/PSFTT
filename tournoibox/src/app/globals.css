@@ -55,3 +55,9 @@ body {
   .fill-complet { --fill: var(--color-hot); }
   .fill-illimite { --fill: var(--color-brand-2); }
 }
+
+/* Écran de la salle */
+@keyframes slidein { from { opacity: 0; transform: translateY(1.5vw); } to { opacity: 1; transform: none; } }
+@keyframes progress { from { width: 0; } to { width: 100%; } }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker { animation: ticker 30s linear infinite; }

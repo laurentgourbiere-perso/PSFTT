@@ -10,7 +10,7 @@ export function Clock() {
     const t = setInterval(tick, 10_000);
     return () => clearInterval(t);
   }, []);
-  return <p className="font-display text-6xl font-bold tabular-nums">{now}</p>;
+  return <p className="font-display text-[3vw] font-bold tabular-nums leading-none">{now}</p>;
 }
 
 export function FullscreenButton() {

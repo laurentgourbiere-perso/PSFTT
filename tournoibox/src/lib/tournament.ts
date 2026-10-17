@@ -6,6 +6,7 @@ export type Tournament = {
   sport: string; court_label: string; courts_count: number; max_players: number | null; max_events: number;
   price_1: number; price_2: number; price_double: number;
   status: "inscriptions" | "en_cours" | "termine"; created_at: string;
+  screen_mode: string; screen_message: string | null; slide_seconds: number;
 };
 
 export type TEvent = {

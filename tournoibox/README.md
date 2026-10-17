@@ -46,13 +46,18 @@ Au premier lancement, TournoiBox demande de choisir le **mot de passe organisate
   - appel manuel sur une table choisie, « Commencer », « Libérer » (le match retourne dans la file)
   - saisie du score directement sur la table : la table se libère et le tableau avance
   - file d'attente commentée (joueur occupé, vient de jouer) et derniers résultats corrigeables
-- **Écran de la salle** (fenêtre à glisser sur le vidéoprojecteur, plein écran) : places restantes par tableau, mises à jour toutes les 3 secondes
+- **Écran de la salle** (fenêtre à glisser sur le vidéoprojecteur, plein écran, pointeur masqué), mis à jour toutes les 3 secondes et lisible à toute taille d'écran
+  - **mode automatique** selon l'avancement : avant le tournoi les places restantes ; pendant, les appels, les tables, les poules (6 par page), les tableaux finaux, les derniers résultats et les podiums déjà connus ; à la fin, les podiums
+  - en automatique, les matchs appelés restent affichés en bandeau sur toutes les diapositives
+  - modes forcés : places restantes, appels, tables, poules, tableaux, résultats, podiums, annonce plein écran
+  - annonce qui défile en bas de l'écran (« Remise des prix à 18h »), durée des diapositives réglable
+- **Onglet Écran** : on pilote le vidéoprojecteur depuis le poste organisateur (changement en 3 secondes), avec un aperçu en direct
 
 ## Feuille de route
 
 1. ✅ Création du tournoi et inscriptions avec places restantes
 2. ✅ Tirage au sort, poules et tableaux
 3. ✅ Appel des matchs sur les tables, saisie des scores
-4. Modes de diffusion qui s'enchaînent selon l'état du tournoi : places restantes, poules qui défilent, tableaux, appels des joueurs, résultats, podiums
+4. ✅ Modes de diffusion qui s'enchaînent selon l'état du tournoi : places restantes, poules qui défilent, tableaux, appels des joueurs, résultats, podiums
 5. Lots, tombola, palmarès
 6. Installateur Windows (double-clic, raccourci sur le bureau, sauvegarde automatique de la base)

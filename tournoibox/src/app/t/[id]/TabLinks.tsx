@@ -6,6 +6,7 @@ const TABS = [
   ["inscriptions", "Inscriptions"],
   ["competition", "Compétition"],
   ["salle", "Salle"],
+  ["ecran", "Écran"],
   ["tableaux", "Tableaux"],
   ["reglages", "Réglages"],
 ] as const;
