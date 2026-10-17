@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+// Démarre la sauvegarde automatique de la base dès la première page servie
+import "@/lib/backup";
 
 export const metadata: Metadata = {
   title: { default: "TournoiBox", template: "%s · TournoiBox" },

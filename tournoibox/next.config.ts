@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
+  // Application installée : un serveur autonome (avec ses seules dépendances) embarqué avec Node.js
+  output: "standalone",
+  outputFileTracingRoot: process.cwd(), // le projet est rangé dans le dépôt PSFTT : on ne remonte pas au-dessus
+  experimental: { serverActions: { bodySizeLimit: "200mb" } }, // import d'une sauvegarde
   // Application locale : pas de télémétrie ni d'en-tête révélant la technologie
   poweredByHeader: false,
   async headers() {

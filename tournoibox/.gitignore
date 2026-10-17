@@ -5,3 +5,6 @@ next-env.d.ts
 .env*
 # Données du tournoi (base, secret de session) : restent sur le PC de l'organisateur
 data/
+
+# Application empaquetée (npm run package)
+dist/

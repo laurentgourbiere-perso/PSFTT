@@ -2,16 +2,18 @@ import "server-only";
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
+import { SCHEMA } from "./schema";
 
-// Dossier des données : à côté de l'application, ou celui choisi par l'installateur
+// Dossier des données : choisi par le lanceur de l'application installée, sinon ./data en développement
 export const DATA_DIR = process.env.TOURNOIBOX_DATA ?? path.join(process.cwd(), "data");
+export const DB_PATH = path.join(DATA_DIR, "tournoibox.db");
 
 function open() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
-  const db = new Database(path.join(DATA_DIR, "tournoibox.db"));
+  const db = new Database(DB_PATH);
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
-  db.exec(fs.readFileSync(path.join(process.cwd(), "src/lib/schema.sql"), "utf8"));
+  db.exec(SCHEMA);
   migrate(db);
   return db;
 }
@@ -23,7 +25,9 @@ const COLUMNS: [table: string, column: string, definition: string][] = [
   ["tournaments", "slide_seconds", "INTEGER NOT NULL DEFAULT 12"],    // durée d'une diapositive en mode automatique
 ];
 
-function migrate(db: Database.Database) {
+/** Met une base (actuelle, restaurée ou importée) au niveau du schéma courant. */
+export function migrate(db: Database.Database) {
+  db.exec(SCHEMA);
   for (const [table, column, definition] of COLUMNS) {
     const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
     if (!cols.some((c) => c.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);

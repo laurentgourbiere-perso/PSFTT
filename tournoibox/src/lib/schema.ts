@@ -1,5 +1,5 @@
--- Schéma TournoiBox (SQLite). Idempotent : exécuté à chaque démarrage.
-
+// Schéma TournoiBox (SQLite), embarqué dans le code pour l'application installée. Idempotent : exécuté à chaque démarrage.
+export const SCHEMA = `
 -- Réglages de l'installation (mot de passe organisateur…)
 CREATE TABLE IF NOT EXISTS settings (
   key    TEXT PRIMARY KEY,
@@ -115,3 +115,4 @@ CREATE TABLE IF NOT EXISTS prizes (
   handed_at      TEXT                           -- lot remis
 );
 CREATE INDEX IF NOT EXISTS idx_prizes_tournament ON prizes(tournament_id);
+`;

@@ -4,17 +4,36 @@
 
 Pensé d'abord pour le tennis de table, mais prévu pour d'autres sports (badminton, tennis, pétanque…).
 
-## Lancer TournoiBox
+## Installer TournoiBox sur un PC (Windows 10 ou 11)
 
-Il faut **Node.js 20 ou plus récent**.
+1. Copiez `TournoiBox-Setup.exe` sur le PC (clé USB, partage…) et double-cliquez dessus. Aucun droit administrateur ni connexion internet n'est nécessaire.
+2. Windows peut afficher « Windows a protégé votre ordinateur » : l'installateur n'est pas encore signé. Cliquez sur **Informations complémentaires** puis **Exécuter quand même**.
+3. Une icône **TournoiBox** apparaît sur le bureau et dans le menu Démarrer. TournoiBox s'ouvre dans le navigateur ; choisissez le **mot de passe organisateur**.
+
+- Programme : `%LOCALAPPDATA%\Programs\TournoiBox` (Node.js est inclus, rien d'autre à installer)
+- Données et sauvegardes : `%LOCALAPPDATA%\TournoiBox\data`, conservées lors d'une mise à jour (relancer simplement un nouvel installateur)
+- Pour arrêter : bouton **Quitter** en haut à droite (une dernière sauvegarde est faite). Pour désinstaller : Paramètres Windows › Applications › TournoiBox ; les tournois sont gardés, sauf si vous demandez à les effacer
+- Sans installation : `TournoiBox-portable.zip`, à décompresser n'importe où (même sur une clé USB), puis double-clic sur `TournoiBox.vbs`
+
+### Fabriquer l'installateur
+
+Sous Windows, avec Node.js (sa version est celle qui sera embarquée) :
+
+```bash
+cd tournoibox
+npm install
+npm run package    # produit dist/TournoiBox-Setup.exe et dist/TournoiBox-portable.zip
+```
+
+L'installateur est construit avec IExpress, fourni avec Windows : aucun outil supplémentaire.
+
+## Développer
 
 ```bash
 cd tournoibox
 npm install
 npm run dev        # puis ouvrir http://localhost:3210
 ```
-
-Au premier lancement, TournoiBox demande de choisir le **mot de passe organisateur**.
 
 ## Sécurité
 
@@ -23,7 +42,8 @@ Au premier lancement, TournoiBox demande de choisir le **mot de passe organisate
 - Mot de passe organisateur haché (bcrypt), 5 essais par minute maximum, session signée qui expire après 14 h, bouton « Verrouiller »
 - Changer le mot de passe déconnecte les autres fenêtres
 - Les écrans de diffusion sont en lecture seule
-- Aucune police, aucun script ni aucune donnée ne vient d'internet ou n'y part. Les données restent dans `data/` (jamais versionné)
+- Aucune police, aucun script ni aucune donnée ne vient d'internet ou n'y part. Les données restent sur le PC (`data/` en développement, jamais versionné)
+- **Sauvegardes automatiques** au démarrage puis toutes les 2 minutes dès qu'il y a du changement (40 gardées), sauvegarde manuelle, téléchargement pour clé USB, restauration et import depuis un autre PC (onglet Sauvegardes) ; avant chaque restauration, l'état actuel est sauvegardé
 
 ## Ce qui marche aujourd'hui
 
@@ -66,4 +86,5 @@ Au premier lancement, TournoiBox demande de choisir le **mot de passe organisate
 3. ✅ Appel des matchs sur les tables, saisie des scores
 4. ✅ Modes de diffusion qui s'enchaînent selon l'état du tournoi : places restantes, poules qui défilent, tableaux, appels des joueurs, résultats, podiums
 5. ✅ Lots, tombola, palmarès
-6. Installateur Windows (double-clic, raccourci sur le bureau, sauvegarde automatique de la base)
+6. ✅ Installateur Windows et sauvegarde automatique
+7. Pistes : signature de l'installateur, réseau local (scores sur téléphone, plusieurs écrans), import des licenciés, export FFTT
