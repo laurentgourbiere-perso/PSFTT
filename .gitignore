@@ -1,0 +1,7 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env*
+# Données locales (base SQLite, photos, secret de session) : jamais versionnées (RGPD)
+data/

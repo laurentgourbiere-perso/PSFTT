@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@theme {
+  --color-club-blue: #0b3c8c;
+  --color-club-navy: #0a1633;
+  --color-club-yellow: #ffd400;
+  --color-club-red: #e30613;
+  --font-display: var(--font-anton), "Impact", sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+body {
+  overflow-x: clip;
+  background: #0a1633;
+  color: #f4f6fb;
+}
+
+/* Dans @layer components pour que les utilitaires Tailwind (hidden, w-full…) gardent la priorité */
+@layer components {
+.font-display { font-family: var(--font-display); letter-spacing: 0.02em; }
+
+/* Bandes diagonales « maillot » */
+.stripes {
+  background-image: repeating-linear-gradient(-45deg, rgba(255,255,255,.04) 0 14px, transparent 14px 28px);
+}
+
+.hero-bg {
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, rgba(255,212,0,.35), transparent 60%),
+    radial-gradient(50rem 30rem at -10% 110%, rgba(227,6,19,.35), transparent 60%),
+    linear-gradient(135deg, #0b3c8c 0%, #0a1633 70%);
+}
+
+.skew-tag {
+  display: inline-block;
+  transform: skewX(-12deg);
+  padding: .15rem .75rem;
+}
+.skew-tag > * { display: inline-block; transform: skewX(12deg); }
+
+.card-surface {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(6px);
+}
+
+.input {
+  width: 100%;
+  border-radius: .75rem;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(0,0,0,.25);
+  padding: .6rem .85rem;
+  color: white;
+  outline: none;
+}
+.input:focus { border-color: #ffd400; box-shadow: 0 0 0 3px rgba(255,212,0,.25); }
+.label { display: block; font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #cbd5e1; margin-bottom: .3rem; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: .5rem; justify-content: center;
+  border-radius: 999px; padding: .6rem 1.25rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; font-size: .85rem;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-primary { background: #ffd400; color: #0a1633; box-shadow: 0 6px 0 #b39500; }
+.btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #b39500; }
+.btn-red { background: #e30613; color: white; box-shadow: 0 6px 0 #8f040c; }
+.btn-ghost { border: 2px solid rgba(255,255,255,.3); color: white; }
+.btn-ghost:hover { border-color: #ffd400; color: #ffd400; }
+
+/* ---------- Carte Panini ---------- */
+.panini { perspective: 1200px; }
+.panini-inner {
+  position: relative; width: 100%; aspect-ratio: 5 / 7;
+  transition: transform .7s cubic-bezier(.2,.8,.2,1);
+  transform-style: preserve-3d;
+}
+.panini:hover .panini-inner, .panini.flipped .panini-inner { transform: rotateY(180deg); }
+.panini-face {
+  position: absolute; inset: 0; backface-visibility: hidden; border-radius: 1rem; overflow: hidden;
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,.6);
+}
+.panini-back { transform: rotateY(180deg); }
+
+.rarity-bronze  { --r1: #cd7f32; --r2: #7a4419; }
+.rarity-argent  { --r1: #e5e7eb; --r2: #8b95a5; }
+.rarity-or      { --r1: #ffd400; --r2: #c08a00; }
+.rarity-legende { --r1: #ff5ea8; --r2: #7b2ff7; }
+
+.panini-frame {
+  padding: 6px;
+  background: linear-gradient(135deg, var(--r1), var(--r2), var(--r1));
+}
+.holo::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: color-dodge; opacity: .35;
+  background: linear-gradient(115deg, transparent 20%, rgba(255,0,150,.6) 35%, rgba(0,255,255,.6) 50%, rgba(255,255,0,.6) 65%, transparent 80%);
+  background-size: 250% 250%;
+  animation: holo 4s linear infinite;
+}
+@keyframes holo { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+@keyframes float { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-14px) rotate(3deg); } }
+.float { animation: float 5s ease-in-out infinite; }
+@keyframes bounce-ball { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-40px); } }
+.bounce-ball { animation: bounce-ball 1.2s cubic-bezier(.5,0,.5,1) infinite; }
+
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee { animation: marquee 30s linear infinite; }
+
+.text-stroke { color: transparent; -webkit-text-stroke: 2px #fff; }
+}
