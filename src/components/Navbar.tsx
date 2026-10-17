@@ -19,6 +19,7 @@ export async function Navbar() {
     { href: "/equipes", label: "Équipes" },
     { href: "/rencontres", label: "Rencontres" },
     { href: "/joueurs", label: "Joueurs" },
+    { href: "/tournoi", label: "Tournoi" },
   ];
   if (user) links.push({ href: "/espace", label: "Mon espace" });
   if (can.seeMeetings(user?.role)) links.push({ href: "/comite/reunions", label: "Réunions" });

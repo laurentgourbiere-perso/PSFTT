@@ -30,4 +30,6 @@ export const can = {
   editMeetings: (r?: string | null) => hasRole(r, "bureau"),
   seeBudget: (r?: string | null) => hasRole(r, "bureau"),
   manageUsers: (r?: string | null) => hasRole(r, "admin"),
+  runTournament: (r?: string | null) => hasRole(r, "bureau"), // juge-arbitre, table de marque
+  scoreTournament: (r?: string | null) => hasRole(r, "adherent"), // bénévoles qui tiennent le score à une table
 };

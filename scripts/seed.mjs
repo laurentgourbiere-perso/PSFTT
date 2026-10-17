@@ -19,6 +19,7 @@ db.pragma("foreign_keys = ON");
 db.exec(fs.readFileSync(path.join(process.cwd(), "src/lib/schema.sql"), "utf8"));
 
 if (db.prepare("SELECT COUNT(*) AS n FROM users").get().n > 0) {
+  if (seedTournament()) console.log("Tournoi de démonstration ajouté.");
   console.log("La base contient déjà des données. Utilisez `npm run reset` pour repartir de zéro.");
   process.exit(0);
 }
@@ -139,9 +140,39 @@ insNews.run("40 ans, ça se fête !", "Soirée anniversaire avec anciens et nouv
 insNews.run("Tournoi de Noël", "Tableaux loisirs, jeunes et doubles surprises. Inscriptions bientôt ouvertes.", "🎄", saturday(-2));
 insNews.run("Maillots collector", "Une édition limitée « 40 ans » jaune et bleu est en préparation.", "👕", saturday(-4));
 
+seedTournament();
+
 console.log(`Base de démonstration créée : ${DB_FILE}`);
 console.log(`Comptes (mot de passe commun : ${DEMO_PASSWORD})`);
 console.log("  admin@psftt.local      Administrateur");
 console.log("  bureau@psftt.local     Comité");
 console.log("  capitaine@psftt.local  Capitaine");
 console.log("  adherent@psftt.local   Adhérent");
+
+// Tournoi du Torrenchin (repris de l'affiche 2025 pour l'édition suivante). Ajouté aussi dans une base existante.
+function seedTournament() {
+  if (db.prepare("SELECT COUNT(*) AS n FROM tournaments").get().n > 0) return false;
+  const tid = db.prepare(`INSERT INTO tournaments (slug, name, date, venue, start_time, checkin_time, description, sponsors, status, max_events, price_1, price_2, price_double, tables_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'inscriptions', 2, 7, 12, 5, 10)`).run(
+    "torrenchin-2027", "24e Tournoi du Torrenchin", "2027-02-20", "Salle des Sports Jacques Larochette, Saint-Forgeux", "13:30", "13:00",
+    "Ouvert à tous, licenciés ou non ! 2 tableaux maximum plus le double. Inscriptions en ligne ou sur place à partir de 13h00.",
+    "Castano Sport\nMaison Brossat\nLa Vie Claire\nWeldom",
+  ).lastInsertRowid;
+  const insEv = db.prepare(`INSERT INTO tournament_events (tournament_id, name, position, is_double, handicap, max_points, min_birth_year, format, group_size, qualifiers, best_of)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+  const insPrize = db.prepare("INSERT INTO tournament_prizes (tournament_id, event_id, rank, label) VALUES (?, ?, ?, ?)");
+  [
+    ["Jeunes -16 ans", 0, 0, null, 2011, "poules", 5],
+    ["Non classés & non licenciés (<700)", 0, 0, 699, null, "poules", 5],
+    ["Handicap", 0, 1, null, null, "poules", 3],
+    ["Toutes séries", 0, 0, null, null, "poules", 5],
+    ["Double", 1, 0, null, null, "ko", 5],
+  ].forEach(([name, dbl, hcp, maxPts, birth, format, bestOf], i) => {
+    const eid = insEv.run(tid, name, i + 1, dbl, hcp, maxPts, birth, format, 3, 2, bestOf).lastInsertRowid;
+    insPrize.run(tid, eid, 1, dbl ? "Coupes + lots pour la paire" : "Coupe + lot");
+    insPrize.run(tid, eid, 2, dbl ? "Médailles + lots pour la paire" : "Médaille + lot");
+    for (let k = 0; k < 2; k++) insPrize.run(tid, eid, 3, dbl ? "Médailles pour la paire" : "Médaille");
+  });
+  for (let k = 0; k < 3; k++) insPrize.run(tid, null, null, "Lot surprise de la tombola");
+  return true;
+}
